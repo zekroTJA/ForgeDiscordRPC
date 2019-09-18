@@ -1,0 +1,16 @@
+[
+  {
+    "modid": "fdrpc",
+    "name": "ForgeDiscordRPC",
+    "description": "A mod connecting Minecraft to Discord RPC",
+    "version": "${version}",
+    "mcversion": "${mcversion}",
+    "url": "https://github.com/zekroTJA/ForgeDiscordRPC",
+    "updateUrl": "",
+    "authorList": ["zekroTJA"],
+    "credits": "© 2019 zekro Development (Ringo Hoffmann)",
+    "logoFile": "",
+    "screenshots": [],
+    "dependencies": []
+  }
+]
