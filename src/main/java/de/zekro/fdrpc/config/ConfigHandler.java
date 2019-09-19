@@ -9,6 +9,10 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 
+/**
+ * Handler for initializing and reading config
+ * values from confuration file.
+ */
 public class ConfigHandler {
 
     private File mainConfigFile;
@@ -16,11 +20,22 @@ public class ConfigHandler {
     public String discordAppID = "";
     public HashMap<String, String> dimensionNames = new HashMap<>();
 
+    /**
+     * Initializes ConfigHandler instance, creates path to config
+     * file and opens config file handler.
+     * 
+     * @param event forge pre-initialization event
+     */
     public ConfigHandler(FMLPreInitializationEvent event) {
         File mainConfigLocation = new File(event.getModConfigurationDirectory() + "/" + ForgeDiscordRPC.MOD_ID);
         mainConfigFile = new File(mainConfigLocation.getPath(), ForgeDiscordRPC.MOD_ID + ".cfg");
     }
 
+    /**
+     * Initializes configuration values from existing config
+     * file or creates default config file with defaultly
+     * defined values.
+     */
     public void init() {
         Configuration mainConfig = new Configuration(mainConfigFile);
 
@@ -44,7 +59,7 @@ public class ConfigHandler {
 
         Arrays.asList(dimensionNameList).forEach(e -> {
             final String[] split = e.split(":");
-            System.out.printf("%s - %s\n", split[0], split[1]);
+            
             if (split.length > 1)
                 dimensionNames.put(split[0], split[1]);
         });

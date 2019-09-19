@@ -9,6 +9,10 @@ import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
+/**
+ * ForgeDiscordRPC Forge Minecraft Modification.
+ * @author zekro (Ringo Hoffmann)
+ */
 @Mod(modid = ForgeDiscordRPC.MOD_ID, name = ForgeDiscordRPC.NAME, version = ForgeDiscordRPC.VERSION)
 public class ForgeDiscordRPC {
     public static final String MOD_ID = "fdrpc";

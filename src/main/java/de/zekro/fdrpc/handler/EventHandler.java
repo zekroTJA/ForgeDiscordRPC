@@ -16,6 +16,9 @@ import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Handler for Minecraft Events.
+ */
 @Mod.EventBusSubscriber
 public class EventHandler {
 
@@ -58,6 +61,12 @@ public class EventHandler {
 //        }
 //    }
 
+    /**
+     * Event handler called when a world is loaded.
+     * Adds the world to the loaded worlds list and
+     * sets the RPC state to 'In Game' with the dimension
+     * of the world passed.
+     */
     @SubscribeEvent
     public static void selfLoggedOutEvent(WorldEvent.Load event) {
         final World world = event.getWorld();
@@ -69,6 +78,12 @@ public class EventHandler {
         RPCHandler.setDimension(world);
     }
 
+    /**
+     * Event handler called when the world is unloaded.
+     * Removes the world from the loaded worlds list.
+     * If this list is empty, the RPC state will be set
+     * to 'In Main Menu'.
+     */
     @SubscribeEvent
     public static void selfLoggedEvent(WorldEvent.Unload event) {
         final World world = event.getWorld();
@@ -77,9 +92,8 @@ public class EventHandler {
 
         loadedWorlds.remove(world);
 
-        if (loadedWorlds.size() < 1) {
+        if (loadedWorlds.size() < 1)
             RPCHandler.setMainMenu();
-        }
     }
 
 }
