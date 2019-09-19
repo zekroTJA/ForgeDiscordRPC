@@ -72,7 +72,8 @@ repositories {
 }
 
 dependencies {
-    compile 'com.github.Vatuu:discord-rpc:1.6.2'
+//    compile 'com.github.Vatuu:discord-rpc:1.6.2'
+    compile fileTree(include: ['*.jar'], dir: 'src/libs')
 }
 
 processResources {
@@ -126,3 +127,7 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
 }
 
 build.dependsOn signJar
+
+jar {
+    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+}
