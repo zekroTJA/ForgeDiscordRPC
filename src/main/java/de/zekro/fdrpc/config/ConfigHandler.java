@@ -3,7 +3,6 @@ package de.zekro.fdrpc.config;
 import de.zekro.fdrpc.ForgeDiscordRPC;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import scala.Console;
 
 import java.io.File;
 import java.util.Arrays;

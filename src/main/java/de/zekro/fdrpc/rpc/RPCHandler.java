@@ -22,6 +22,7 @@ public class RPCHandler {
     private static final String MAIN_IMAGE_ALT = "Evolved Technics";
 
     private static long startTime = 0;
+    private static World currWorld;
 
     /**
      * TickEventHandler running RPC Callback everytime
@@ -83,7 +84,7 @@ public class RPCHandler {
     }
 
     /**
-     * Returnes the pre-configured presence builder for
+     * Returns the pre-configured presence builder for
      * the main menu state.
      */
     public static Builder getMainMenuPresence() {
@@ -119,19 +120,54 @@ public class RPCHandler {
     /**
      * Sets the current RPC state to 'In Game' with the
      * passed worlds dimension as detail text.
-     * The dimentsion ID will be tried to be replaced with
+     * The dimension ID will be tried to be replaced with
      * the friendly name set in the config. If this was not
      * found, the dimension name ID will be used instead.
-     * 
+     *
      * @param worldIn world the player is in
+     * @param curr current player count
+     * @param max max player count
      */
-    public static void setDimension(World worldIn) {
+    public static void setDimension(World worldIn, int curr, int max) {
         final String dimensionName = worldIn.provider.getDimensionType().getName();
         final String displayName = ForgeDiscordRPC.configHandler.dimensionNames.getOrDefault(dimensionName, dimensionName);
 
-        setPresence(RPCHandler
+        currWorld = worldIn;
+
+        final Builder builder = RPCHandler
                 .getPresenceBuilder("In " + displayName, MAIN_IMAGE_ALT)
-                .setDetails("In Game"));
+                .setDetails("In Game");
+
+        if (curr > 0 && max > 0) {
+            builder.setParty("Party", curr, max);
+        }
+
+        setPresence(builder);
+    }
+
+    /**
+     * Sets the current RPC state to 'In Game' with the
+     * passed worlds dimension as detail text.
+     * The dimension ID will be tried to be replaced with
+     * the friendly name set in the config. If this was not
+     * found, the dimension name ID will be used instead.
+     *
+     * @param worldIn world the player is in
+     */
+    public static void setDimension(World worldIn) {
+        setDimension(worldIn, 0, 0);
+    }
+
+    /**
+     * Updates the party player count.
+     *
+     * @param curr current player count
+     * @param max max player count
+     */
+    public static void setPlayerCount(int curr, int max) {
+        if (currWorld == null) return;
+
+        setDimension(currWorld, curr, max);
     }
 
 }

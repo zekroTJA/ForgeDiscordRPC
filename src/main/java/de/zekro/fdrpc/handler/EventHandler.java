@@ -1,19 +1,17 @@
 package de.zekro.fdrpc.handler;
 
-import de.zekro.fdrpc.ForgeDiscordRPC;
 import de.zekro.fdrpc.rpc.RPCHandler;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.network.NetHandlerPlayClient;
+import net.minecraft.client.network.NetworkPlayerInfo;
 import net.minecraft.world.World;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.network.FMLNetworkEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedOutEvent;
-import net.minecraftforge.fml.common.gameevent.PlayerEvent.PlayerLoggedInEvent;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -24,42 +22,39 @@ public class EventHandler {
 
     private static List<World> loadedWorlds = new ArrayList<>();
 
-//    @SubscribeEvent
-//    public static void onClonePlayer(PlayerEvent.Clone event) {
-//        System.out.println("CLONE PLAYER");
-//    }
+    private static int currentServerPlayers;
+    private static int currentServerSlots;
 
-//    @SubscribeEvent
-//    public static void loggedOutHandler(PlayerLoggedOutEvent event) {
-//        EntityPlayer player = event.player;
-//        World world = player.world;
-//        if (!world.isRemote) {
-//            ForgeDiscordRPC.rpcHandler.setMainMenu();
-//        }
-//    }
-//
-//    @SubscribeEvent
-//    public static void loggedInHandler(PlayerLoggedInEvent event) {
-//        EntityPlayer player = event.player;
-//        World world = player.world;
-//        if (!world.isRemote) {
-//            ForgeDiscordRPC.rpcHandler.setDimension(world);
-//            System.out.println("WORLD JOINED" + player.getName());
-//        }
-//    }
+    /**
+     * Event which is fired every tick when connected
+     * to a world.
+     * This handler is responsible for setting the size
+     * and player count of the RPC party.
+     *
+     * @throws NullPointerException This handlers registration may throw a
+     *                               NullPointerException under currently
+     *                               seemly random circumstances.
+     * @param event player event
+     */
+    @SubscribeEvent
+    public static void playerEvent(PlayerEvent event) {
+        if (event == null || event.getEntityPlayer() == null) return;
 
-//    @SubscribeEvent
-//    public static void loggedInEvent(FMLNetworkEvent.ClientConnectedToServerEvent event) {
-//        ForgeDiscordRPC.rpcHandler.setDimension(event.);
-//            System.out.println("WORLD JOINED");
-//    }
+        final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
+        if (netHandlerPlayClient == null) return;
 
-//    @SubscribeEvent
-//    public static void entityJoinEvent(EntityJoinWorldEvent event) {
-//        if (event.getEntity() instanceof EntityPlayer) {
-//            System.out.println("JOINED WORLD");
-//        }
-//    }
+        final Collection<NetworkPlayerInfo> playerInfoMap = netHandlerPlayClient.getPlayerInfoMap();
+
+        final int playersSize = playerInfoMap.size();
+        final int slots = netHandlerPlayClient.currentServerMaxPlayers;
+
+        if (playersSize == currentServerPlayers && slots == currentServerSlots)
+            return;
+
+        currentServerPlayers = playerInfoMap.size();
+        currentServerSlots = netHandlerPlayClient.currentServerMaxPlayers;
+        RPCHandler.setPlayerCount(currentServerPlayers, currentServerSlots);
+    }
 
     /**
      * Event handler called when a world is loaded.
@@ -68,12 +63,15 @@ public class EventHandler {
      * of the world passed.
      */
     @SubscribeEvent
-    public static void selfLoggedOutEvent(WorldEvent.Load event) {
+    public static void selfLoggedInEvent(WorldEvent.Load event) {
         final World world = event.getWorld();
         if (!world.isRemote)
             return;
 
         loadedWorlds.add(world);
+
+        currentServerSlots = 0;
+        currentServerPlayers = 0;
 
         RPCHandler.setDimension(world);
     }
@@ -85,7 +83,7 @@ public class EventHandler {
      * to 'In Main Menu'.
      */
     @SubscribeEvent
-    public static void selfLoggedEvent(WorldEvent.Unload event) {
+    public static void selfLoggedOutEvent(WorldEvent.Unload event) {
         final World world = event.getWorld();
         if (!world.isRemote)
             return;
