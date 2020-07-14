@@ -66,13 +66,11 @@ repositories {
     }
 
     maven {
-
         url 'http://maven.blamejared.com'
     }
 }
 
 dependencies {
-//    compile 'com.github.Vatuu:discord-rpc:1.6.2'
     compile fileTree(include: ['*.jar'], dir: 'src/libs')
 }
 
@@ -128,6 +126,6 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
 
 build.dependsOn signJar
 
-jar {
-    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-}
+//jar {
+//    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+//}

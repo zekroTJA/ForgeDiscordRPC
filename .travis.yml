@@ -11,4 +11,4 @@ before_install:
 #  - ./gradlew setupDecompWorkspace
 
 script:
-  - ./gradlew jar
+  - ./gradlew build
