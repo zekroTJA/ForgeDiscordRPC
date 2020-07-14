@@ -8,7 +8,7 @@ jdk:
 before_install:
   - git update-index --chmod=+x gradlew
   - chmod +x gradlew
-  - ./gradlew setupDecompWorkspace
+#  - ./gradlew setupDecompWorkspace
 
 script:
   - ./gradlew jar
