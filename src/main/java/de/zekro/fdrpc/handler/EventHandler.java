@@ -38,10 +38,12 @@ public class EventHandler {
      */
     @SubscribeEvent
     public static void playerEvent(PlayerEvent event) {
-        if (event == null || event.getEntityPlayer() == null) return;
+        if (event == null || event.getEntityPlayer() == null || event.getEntityPlayer().getEntityWorld().isRemote)
+            return;
 
         final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
-        if (netHandlerPlayClient == null) return;
+        if (netHandlerPlayClient == null)
+            return;
 
         final Collection<NetworkPlayerInfo> playerInfoMap = netHandlerPlayClient.getPlayerInfoMap();
 
@@ -65,8 +67,8 @@ public class EventHandler {
     @SubscribeEvent
     public static void selfLoggedInEvent(WorldEvent.Load event) {
         final World world = event.getWorld();
-        if (!world.isRemote)
-            return;
+//        if (!world.isRemote)
+//            return;
 
         loadedWorlds.add(world);
 
@@ -85,8 +87,8 @@ public class EventHandler {
     @SubscribeEvent
     public static void selfLoggedOutEvent(WorldEvent.Unload event) {
         final World world = event.getWorld();
-        if (!world.isRemote)
-            return;
+//        if (!world.isRemote)
+//            return;
 
         loadedWorlds.remove(world);
 

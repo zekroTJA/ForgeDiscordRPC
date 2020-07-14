@@ -1,11 +1,9 @@
 package de.zekro.fdrpc;
 
-import de.zekro.fdrpc.config.ConfigHandler;
-import de.zekro.fdrpc.proxy.CommonProxy;
+import de.zekro.fdrpc.config.Config;
 import de.zekro.fdrpc.rpc.RPCHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
-import net.minecraftforge.fml.common.SidedProxy;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
@@ -19,15 +17,12 @@ public class ForgeDiscordRPC {
     public static final String NAME = "ForgeDiscordRPC";
     public static final String VERSION = "1.1";
 
-    @SidedProxy(clientSide = "de.zekro.fdrpc.proxy.ClientProxy", serverSide = "de.zekro.fdrpc.proxy.CommonProxy")
-    static CommonProxy proxy;
-
-    public static ConfigHandler configHandler;
+    private static Config config;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
-        configHandler = new ConfigHandler(event);
-        configHandler.init();
+        config = new Config(event);
+        config.init();
 
         RPCHandler.connect();
         RPCHandler.setInitializing();
@@ -36,5 +31,9 @@ public class ForgeDiscordRPC {
     @EventHandler
     public void init(FMLInitializationEvent event) {
         RPCHandler.setMainMenu();
+    }
+
+    public static Config getConfig() {
+        return config;
     }
 }

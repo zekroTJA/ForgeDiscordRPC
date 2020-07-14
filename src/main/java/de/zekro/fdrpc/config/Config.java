@@ -10,14 +10,15 @@ import java.util.HashMap;
 
 /**
  * Handler for initializing and reading config
- * values from confuration file.
+ * values from confutation file.
  */
-public class ConfigHandler {
+public class Config {
 
     private File mainConfigFile;
 
-    public String discordAppID = "";
-    public HashMap<String, String> dimensionNames = new HashMap<>();
+    private String discordAppID = "";
+    private String mainImageAlt = "";
+    private HashMap<String, String> dimensionNames = new HashMap<>();
 
     /**
      * Initializes ConfigHandler instance, creates path to config
@@ -25,14 +26,14 @@ public class ConfigHandler {
      * 
      * @param event forge pre-initialization event
      */
-    public ConfigHandler(FMLPreInitializationEvent event) {
+    public Config(FMLPreInitializationEvent event) {
         File mainConfigLocation = new File(event.getModConfigurationDirectory() + "/" + ForgeDiscordRPC.MOD_ID);
         mainConfigFile = new File(mainConfigLocation.getPath(), ForgeDiscordRPC.MOD_ID + ".cfg");
     }
 
     /**
      * Initializes configuration values from existing config
-     * file or creates default config file with defaultly
+     * file or creates default config file with default
      * defined values.
      */
     public void init() {
@@ -40,11 +41,24 @@ public class ConfigHandler {
 
         String category;
 
+        // -------------------------------------------------------------------------------------------------------------
+        // --- CAT: DISCORD ---
+
         category = "discord";
         mainConfig.addCustomCategoryComment(category, "General Discord API app settings");
+
         discordAppID = mainConfig.getString(
                 "app_id", category, "",
-                "The ID of the Discord API application created at https://discordapp.com/developers/applications");
+                "The ID of the Discord API application created at https://discordapp.com/developers/applications."
+        );
+
+        mainImageAlt = mainConfig.getString(
+                "main_image_alt", category, "",
+                "The alt text of the main Discord RPC image."
+        );
+
+        // -------------------------------------------------------------------------------------------------------------
+        // --- CAT: MISC ---
 
         category = "misc";
         mainConfig.addCustomCategoryComment(category, "Miscellaneous settings");
@@ -64,5 +78,17 @@ public class ConfigHandler {
         });
 
         mainConfig.save();
+    }
+
+    public String getDiscordAppID() {
+        return discordAppID;
+    }
+
+    public String getMainImageAlt() {
+        return mainImageAlt;
+    }
+
+    public HashMap<String, String> getDimensionNames() {
+        return dimensionNames;
     }
 }

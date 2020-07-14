@@ -19,13 +19,12 @@ import net.arikia.dev.drpc.DiscordRichPresence.Builder;
 public class RPCHandler {
 
     private static final String IMAGE_MAIN_LOGO = "mainicon";
-    private static final String MAIN_IMAGE_ALT = "Evolved Technics";
 
     private static long startTime = 0;
     private static World currWorld;
 
     /**
-     * TickEventHandler running RPC Callback everytime
+     * TickEventHandler running RPC Callback every time
      * TickEvent was fired.
      */
     private static final Object discordCallbackExecutor = new Object() {
@@ -62,7 +61,7 @@ public class RPCHandler {
                 .setErroredEventHandler(errorHandler)
                 .build();
 
-        DiscordRPC.discordInitialize(ForgeDiscordRPC.configHandler.discordAppID, handlers, true);
+        DiscordRPC.discordInitialize(ForgeDiscordRPC.getConfig().getDiscordAppID(), handlers, true);
 
         MinecraftForge.EVENT_BUS.register(discordCallbackExecutor);
     }
@@ -88,7 +87,7 @@ public class RPCHandler {
      * the main menu state.
      */
     public static Builder getMainMenuPresence() {
-        return getPresenceBuilder("In Main Menu", MAIN_IMAGE_ALT);
+        return getPresenceBuilder("In Main Menu", ForgeDiscordRPC.getConfig().getMainImageAlt());
     }
 
     /**
@@ -106,7 +105,7 @@ public class RPCHandler {
         startTime = System.currentTimeMillis();
 
         setPresence(RPCHandler
-                .getPresenceBuilder("Initializing...", MAIN_IMAGE_ALT)
+                .getPresenceBuilder("Initializing...", ForgeDiscordRPC.getConfig().getMainImageAlt())
                 .setDetails("Initializing Forge & Minecraft..."));
     }
 
@@ -130,12 +129,13 @@ public class RPCHandler {
      */
     public static void setDimension(World worldIn, int curr, int max) {
         final String dimensionName = worldIn.provider.getDimensionType().getName();
-        final String displayName = ForgeDiscordRPC.configHandler.dimensionNames.getOrDefault(dimensionName, dimensionName);
+        final String displayName = ForgeDiscordRPC.getConfig().getDimensionNames()
+                .getOrDefault(dimensionName, dimensionName);
 
         currWorld = worldIn;
 
         final Builder builder = RPCHandler
-                .getPresenceBuilder("In " + displayName, MAIN_IMAGE_ALT)
+                .getPresenceBuilder("In " + displayName, ForgeDiscordRPC.getConfig().getMainImageAlt())
                 .setDetails("In Game");
 
         if (curr > 0 && max > 0) {
@@ -165,7 +165,8 @@ public class RPCHandler {
      * @param max max player count
      */
     public static void setPlayerCount(int curr, int max) {
-        if (currWorld == null) return;
+        if (currWorld == null)
+            return;
 
         setDimension(currWorld, curr, max);
     }
