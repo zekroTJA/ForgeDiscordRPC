@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    implementation fileTree(include: ['*.jar'], dir: 'src/libs')
+    compile fileTree(include: ['*.jar'], dir: 'src/libs')
 }
 
 processResources {
