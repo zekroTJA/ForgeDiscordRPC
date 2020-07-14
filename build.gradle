@@ -71,7 +71,7 @@ repositories {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'src/libs')
+    implementation fileTree(include: ['*.jar'], dir: 'src/libs')
 }
 
 processResources {
@@ -126,6 +126,13 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
 
 build.dependsOn signJar
 
-//jar {
-//    from configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-//}
+task fatJar(type: Jar) {
+    manifest {
+        attributes 'Main-Class': 'com.yourpackage.Main'
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    with jar
+}
