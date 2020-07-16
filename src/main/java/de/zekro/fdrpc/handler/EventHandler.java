@@ -9,6 +9,8 @@ import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.minecraftforge.fml.relauncher.Side;
+import net.minecraftforge.fml.relauncher.SideOnly;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,7 +22,7 @@ import java.util.List;
 @Mod.EventBusSubscriber
 public class EventHandler {
 
-    private static List<World> loadedWorlds = new ArrayList<>();
+    private static final List<World> loadedWorlds = new ArrayList<>();
 
     private static int currentServerPlayers;
     private static int currentServerSlots;
@@ -37,6 +39,7 @@ public class EventHandler {
      * @param event player event
      */
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public static void playerEvent(PlayerEvent event) {
         if (event == null || event.getEntityPlayer() == null || event.getEntityPlayer().getEntityWorld().isRemote)
             return;
@@ -65,6 +68,7 @@ public class EventHandler {
      * of the world passed.
      */
     @SubscribeEvent
+    @SideOnly(Side.CLIENT)
     public static void selfLoggedInEvent(WorldEvent.Load event) {
         final World world = event.getWorld();
 //        if (!world.isRemote)
