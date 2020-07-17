@@ -39,7 +39,7 @@ compileJava {
 }
 
 minecraft {
-    version = "1.12.2-14.23.5.2768"
+    version = "1.12.2-14.23.5.2768" // "1.12.2-14.23.5.2847"
     runDir = "run"
     
     // the mappings can be changed at any time, and must be in the following format.
@@ -53,9 +53,9 @@ minecraft {
 
 repositories {
 
-    maven {
-        url 'https://jitpack.io'
-    }
+//    maven {
+//        url 'https://jitpack.io'
+//    }
 
     maven {
         url 'https://maven.mcmoddev.com'
@@ -109,10 +109,21 @@ if (JavaVersion.current().isJava8Compatible()) {
     }
 }
 
+jar {
+    manifest {
+        attributes "Main-Class": "de.zekro.fdrpc.ForgeDiscordRPC"
+    }
+
+    from {
+        configurations.compile
+                .filter { f -> !f.name.contains("Dummy") }
+                .collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
 task signJar(type: SignJar, dependsOn: reobfJar) {
 
     onlyIf {
-
         project.hasProperty('keyStore')
     }
 
@@ -125,14 +136,3 @@ task signJar(type: SignJar, dependsOn: reobfJar) {
 }
 
 build.dependsOn signJar
-
-task fatJar(type: Jar) {
-    manifest {
-        attributes 'Main-Class': 'com.yourpackage.Main'
-    }
-    from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
-    with jar
-}

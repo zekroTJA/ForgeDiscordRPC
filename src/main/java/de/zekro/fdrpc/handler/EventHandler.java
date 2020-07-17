@@ -2,8 +2,10 @@ package de.zekro.fdrpc.handler;
 
 import de.zekro.fdrpc.rpc.RPCHandler;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.WorldClient;
 import net.minecraft.client.network.NetHandlerPlayClient;
 import net.minecraft.client.network.NetworkPlayerInfo;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.world.WorldEvent;
@@ -33,32 +35,12 @@ public class EventHandler {
      * This handler is responsible for setting the size
      * and player count of the RPC party.
      *
-     * @throws NullPointerException This handlers registration may throw a
-     *                               NullPointerException under currently
-     *                               seemly random circumstances.
      * @param event player event
      */
     @SubscribeEvent
-    @SideOnly(Side.CLIENT)
     public static void playerEvent(PlayerEvent event) {
-        if (event == null || event.getEntityPlayer() == null || event.getEntityPlayer().getEntityWorld().isRemote)
-            return;
-
-        final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
-        if (netHandlerPlayClient == null)
-            return;
-
-        final Collection<NetworkPlayerInfo> playerInfoMap = netHandlerPlayClient.getPlayerInfoMap();
-
-        final int playersSize = playerInfoMap.size();
-        final int slots = netHandlerPlayClient.currentServerMaxPlayers;
-
-        if (playersSize == currentServerPlayers && slots == currentServerSlots)
-            return;
-
-        currentServerPlayers = playerInfoMap.size();
-        currentServerSlots = netHandlerPlayClient.currentServerMaxPlayers;
-        RPCHandler.setPlayerCount(currentServerPlayers, currentServerSlots);
+        if (event.getEntity() instanceof EntityPlayer)
+            update();
     }
 
     /**
@@ -71,8 +53,8 @@ public class EventHandler {
     @SideOnly(Side.CLIENT)
     public static void selfLoggedInEvent(WorldEvent.Load event) {
         final World world = event.getWorld();
-//        if (!world.isRemote)
-//            return;
+        if (!(world instanceof WorldClient))
+            return;
 
         loadedWorlds.add(world);
 
@@ -91,13 +73,40 @@ public class EventHandler {
     @SubscribeEvent
     public static void selfLoggedOutEvent(WorldEvent.Unload event) {
         final World world = event.getWorld();
-//        if (!world.isRemote)
-//            return;
+        if (!(world instanceof WorldClient))
+            return;
 
         loadedWorlds.remove(world);
 
-        if (loadedWorlds.size() < 1)
+        if (loadedWorlds.size() < 1) {
             RPCHandler.setMainMenu();
+            RPCHandler.updatePresence();
+        }
     }
 
+    private static void update() {
+        final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
+        if (netHandlerPlayClient == null)
+            return;
+
+        final boolean singlePlayer = Minecraft.getMinecraft().isSingleplayer();
+
+        final Collection<NetworkPlayerInfo> playerInfoMap = netHandlerPlayClient.getPlayerInfoMap();
+
+        final int playersSize = playerInfoMap.size();
+        final int slots = netHandlerPlayClient.currentServerMaxPlayers;
+
+        if (playersSize == currentServerPlayers && slots == currentServerSlots)
+            return;
+
+        currentServerPlayers = playerInfoMap.size();
+        currentServerSlots = netHandlerPlayClient.currentServerMaxPlayers;
+
+        if (singlePlayer)
+            RPCHandler.setSinglePlayer();
+        else
+            RPCHandler.setMultiPlayer(currentServerPlayers, currentServerSlots);
+
+        RPCHandler.updatePresence();
+    }
 }

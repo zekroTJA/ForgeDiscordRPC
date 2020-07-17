@@ -11,6 +11,8 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.arikia.dev.drpc.DiscordRichPresence.Builder;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Static RPCHandler handling connection to
@@ -20,13 +22,16 @@ public class RPCHandler {
 
     private static final String IMAGE_MAIN_LOGO = "mainicon";
 
+    private static final Logger LOGGER = LogManager.getLogger(ForgeDiscordRPC.MOD_ID);
+
     private static long startTime = 0;
     private static World currWorld;
+    private static String state = "Initializing...";
+    private static String details = "Initializing...";
+    private static int currentPlayers = 0;
+    private static int maxPlayers = 0;
+    private static boolean singlePlayer = true;
 
-    /**
-     * TickEventHandler running RPC Callback every time
-     * TickEvent was fired.
-     */
     private static final Object discordCallbackExecutor = new Object() {
         @SubscribeEvent
         public void tickEvent(TickEvent.ClientTickEvent e) {
@@ -34,27 +39,13 @@ public class RPCHandler {
         }
     };
 
-    /**
-     * Discord RPC Ready callback handler fired
-     * when Discord RPC connection is ready.
-     */
-    private static ReadyCallback connectHandler = (user) -> {
-        System.out.printf("Discord RPC connected to user account %s#%s (%s)",
-                user.username, user.discriminator, user.userId);
-    };
+    private static final ReadyCallback connectHandler = (user) ->
+        LOGGER.info(String.format("Discord RPC connected to user account %s#%s (%s)",
+                user.username, user.discriminator, user.userId));
 
-    /**
-     * Callback handler fired when Discord RPC
-     * connection failed.
-     */
-    private static ErroredCallback errorHandler = (error, errStr) -> {
-        System.err.println(error);
-    };
+    private static final ErroredCallback errorHandler = (error, errStr) ->
+        LOGGER.error(error);
 
-    /**
-     * Try to connect to Discord RPC interface, set
-     * handlers and register tick event executor.
-     */
     public static void connect() {
         DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
                 .setReadyEventHandler(connectHandler)
@@ -66,109 +57,56 @@ public class RPCHandler {
         MinecraftForge.EVENT_BUS.register(discordCallbackExecutor);
     }
 
-    /**
-     * Returns a presence builder with set state
-     * text, main logo and time stamp of the start
-     * time of the Minecraft session.
-     * 
-     * @param state state text
-     * @param bigImageAlt alternative hover text which is shown
-     *                    when hovering over large image
-     * @return the RPC builder
-     */
-    public static Builder getPresenceBuilder(String state, String bigImageAlt) {
-        return new DiscordRichPresence.Builder(state)
-                .setBigImage(IMAGE_MAIN_LOGO, bigImageAlt)
-                .setStartTimestamps(startTime);
-    }
-
-    /**
-     * Returns the pre-configured presence builder for
-     * the main menu state.
-     */
-    public static Builder getMainMenuPresence() {
-        return getPresenceBuilder("In Main Menu", ForgeDiscordRPC.getConfig().getMainImageAlt());
-    }
-
-    /**
-     * Finalizes the passed presence builder and
-     * sets the presence to Discord.
-     */
-    public static void setPresence(Builder presence) {
-        DiscordRPC.discordUpdatePresence(presence.build());
-    }
-
-    /**
-     * Sets the current RPC state to 'Initializing'.
-     */
     public static void setInitializing() {
         startTime = System.currentTimeMillis();
 
-        setPresence(RPCHandler
-                .getPresenceBuilder("Initializing...", ForgeDiscordRPC.getConfig().getMainImageAlt())
-                .setDetails("Initializing Forge & Minecraft..."));
+        details = "Initializing...";
+        state = "Initializing Forge & Minecraft...";
     }
 
-    /**
-     * Sets the current RPC state to 'In Main Menu'
-     */
     public static void setMainMenu() {
-        setPresence(RPCHandler.getMainMenuPresence());
+        details = "In Main Menu";
+        state = "";
     }
 
-    /**
-     * Sets the current RPC state to 'In Game' with the
-     * passed worlds dimension as detail text.
-     * The dimension ID will be tried to be replaced with
-     * the friendly name set in the config. If this was not
-     * found, the dimension name ID will be used instead.
-     *
-     * @param worldIn world the player is in
-     * @param curr current player count
-     * @param max max player count
-     */
-    public static void setDimension(World worldIn, int curr, int max) {
+    public static void setDimension(World worldIn) {
         final String dimensionName = worldIn.provider.getDimensionType().getName();
         final String displayName = ForgeDiscordRPC.getConfig().getDimensionNames()
                 .getOrDefault(dimensionName, dimensionName);
 
-        currWorld = worldIn;
-
-        final Builder builder = RPCHandler
-                .getPresenceBuilder("In " + displayName, ForgeDiscordRPC.getConfig().getMainImageAlt())
-                .setDetails("In Game");
-
-        if (curr > 0 && max > 0) {
-            builder.setParty("Party", curr, max);
-        }
-
-        setPresence(builder);
+        state = String.format("In %s", displayName);
     }
 
-    /**
-     * Sets the current RPC state to 'In Game' with the
-     * passed worlds dimension as detail text.
-     * The dimension ID will be tried to be replaced with
-     * the friendly name set in the config. If this was not
-     * found, the dimension name ID will be used instead.
-     *
-     * @param worldIn world the player is in
-     */
-    public static void setDimension(World worldIn) {
-        setDimension(worldIn, 0, 0);
+    public static void setSinglePlayer() {
+        singlePlayer = true;
+        currentPlayers = 0;
+        maxPlayers = 0;
+
+        details = "In Single Player Game";
     }
 
-    /**
-     * Updates the party player count.
-     *
-     * @param curr current player count
-     * @param max max player count
-     */
-    public static void setPlayerCount(int curr, int max) {
-        if (currWorld == null)
-            return;
+    public static void setMultiPlayer(int curr, int max) {
+        singlePlayer = false;
+        currentPlayers = curr;
+        maxPlayers = max;
 
-        setDimension(currWorld, curr, max);
+        details = "In Multi Player Game";
     }
 
+    public static void updatePresence() {
+        Builder builder = getDefaultPresenceBuilder(state, ForgeDiscordRPC.getConfig().getMainImageAlt())
+                .setDetails(details);
+
+        if (!singlePlayer && currentPlayers != 0 && maxPlayers != 0)
+            builder.setParty("Party", currentPlayers, maxPlayers);
+
+        DiscordRPC.discordUpdatePresence(builder.build());
+    }
+
+
+    private static Builder getDefaultPresenceBuilder(String state, String bigImageAlt) {
+        return new DiscordRichPresence.Builder(state)
+                .setBigImage(IMAGE_MAIN_LOGO, bigImageAlt)
+                .setStartTimestamps(startTime);
+    }
 }
