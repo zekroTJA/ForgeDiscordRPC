@@ -40,11 +40,11 @@ public class RPCHandler {
     };
 
     private static final ReadyCallback connectHandler = (user) ->
-        LOGGER.info(String.format("Discord RPC connected to user account %s#%s (%s)",
+            ForgeDiscordRPC.getLogger().info(String.format("Discord RPC connected to user account %s#%s (%s)",
                 user.username, user.discriminator, user.userId));
 
     private static final ErroredCallback errorHandler = (error, errStr) ->
-        LOGGER.error(error);
+            ForgeDiscordRPC.getLogger().error(error);
 
     public static void connect() {
         DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()

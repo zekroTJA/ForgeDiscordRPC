@@ -6,6 +6,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
+import org.apache.logging.log4j.Logger;
 
 /**
  * ForgeDiscordRPC Forge Minecraft Modification.
@@ -17,12 +18,15 @@ public class ForgeDiscordRPC {
     public static final String NAME = "ForgeDiscordRPC";
     public static final String VERSION = "1.1.0";
 
+    private static Logger logger;
     private static Config config;
 
     @EventHandler
     public void preInit(FMLPreInitializationEvent event) {
         config = new Config(event);
         config.init();
+
+        logger = event.getModLog();
 
         RPCHandler.connect();
         RPCHandler.setInitializing();
@@ -37,5 +41,9 @@ public class ForgeDiscordRPC {
 
     public static Config getConfig() {
         return config;
+    }
+
+    public static Logger getLogger() {
+        return logger;
     }
 }
