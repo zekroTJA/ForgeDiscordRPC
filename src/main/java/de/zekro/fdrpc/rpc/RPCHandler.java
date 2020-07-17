@@ -11,21 +11,15 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.arikia.dev.drpc.DiscordRichPresence.Builder;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
- * Static RPCHandler handling connection to
- * Discord RPC interface.
+ * Function wrapper for {@link DiscordRPC}.
  */
 public class RPCHandler {
 
     private static final String IMAGE_MAIN_LOGO = "mainicon";
 
-    private static final Logger LOGGER = LogManager.getLogger(ForgeDiscordRPC.MOD_ID);
-
     private static long startTime = 0;
-    private static World currWorld;
     private static String state = "Initializing...";
     private static String details = "Initializing...";
     private static int currentPlayers = 0;
@@ -46,6 +40,11 @@ public class RPCHandler {
     private static final ErroredCallback errorHandler = (error, errStr) ->
             ForgeDiscordRPC.getLogger().error(error);
 
+    /**
+     * Connect to the Discord RPC server using the App ID from
+     * configuration file and adding the discordCallbackExecutor
+     * to the forge event bus.
+     */
     public static void connect() {
         DiscordEventHandlers handlers = new DiscordEventHandlers.Builder()
                 .setReadyEventHandler(connectHandler)
@@ -57,6 +56,9 @@ public class RPCHandler {
         MinecraftForge.EVENT_BUS.register(discordCallbackExecutor);
     }
 
+    /**
+     * Set presence state to "Initializing...".
+     */
     public static void setInitializing() {
         startTime = System.currentTimeMillis();
 
@@ -64,11 +66,22 @@ public class RPCHandler {
         state = "Initializing Forge & Minecraft...";
     }
 
+    /**
+     * Set presence state to "In Main Menu".
+     */
     public static void setMainMenu() {
         details = "In Main Menu";
         state = "";
     }
 
+    /**
+     * Set state to specified worlds dimension.
+     *
+     * The dimension name will be tried to be translated form
+     * the configured dimension map.
+     *
+     * @param worldIn world the player is in
+     */
     public static void setDimension(World worldIn) {
         final String dimensionName = worldIn.provider.getDimensionType().getName();
         final String displayName = ForgeDiscordRPC.getConfig().getDimensionNames()
@@ -77,6 +90,9 @@ public class RPCHandler {
         state = String.format("In %s", displayName);
     }
 
+    /**
+     * Sets the presence mode to single player world.
+     */
     public static void setSinglePlayer() {
         singlePlayer = true;
         currentPlayers = 0;
@@ -85,6 +101,14 @@ public class RPCHandler {
         details = "In Single Player Game";
     }
 
+    /**
+     * Sets the presence mode to multi player world
+     * with the passed current player count and max
+     * player count of the server.
+     *
+     * @param curr current player count
+     * @param max max player count
+     */
     public static void setMultiPlayer(int curr, int max) {
         singlePlayer = false;
         currentPlayers = curr;
@@ -93,6 +117,9 @@ public class RPCHandler {
         details = "In Multi Player Game";
     }
 
+    /**
+     * Pushes the presence change to the Discord RPC server.
+     */
     public static void updatePresence() {
         Builder builder = getDefaultPresenceBuilder(state, ForgeDiscordRPC.getConfig().getMainImageAlt())
                 .setDetails(details);

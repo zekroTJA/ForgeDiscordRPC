@@ -30,12 +30,11 @@ public class EventHandler {
     private static int currentServerSlots;
 
     /**
-     * Event which is fired every tick when connected
-     * to a world.
-     * This handler is responsible for setting the size
-     * and player count of the RPC party.
+     * Event hook for {@link PlayerEvent} which fires every time
+     * an action was taken by any player entity on the world.
      *
-     * @param event player event
+     * This calls {@link EventHandler#update} when the entity of
+     * {@link PlayerEvent} is an {@link EntityPlayer}.
      */
     @SubscribeEvent
     public static void playerEvent(PlayerEvent event) {
@@ -45,6 +44,7 @@ public class EventHandler {
 
     /**
      * Event handler called when a world is loaded.
+     *
      * Adds the world to the loaded worlds list and
      * sets the RPC state to 'In Game' with the dimension
      * of the world passed.
@@ -66,6 +66,7 @@ public class EventHandler {
 
     /**
      * Event handler called when the world is unloaded.
+     *
      * Removes the world from the loaded worlds list.
      * If this list is empty, the RPC state will be set
      * to 'In Main Menu'.
@@ -84,6 +85,15 @@ public class EventHandler {
         }
     }
 
+    /**
+     * Update gets the current connection and figures out if
+     * the connected world is a singleplayer world or a
+     * multiplayer server world.
+     *
+     * Depending on this, the presence details are set and, when
+     * connected to a multiplayer world, the party size is
+     * added to the presence.
+     */
     private static void update() {
         final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
         if (netHandlerPlayClient == null)
