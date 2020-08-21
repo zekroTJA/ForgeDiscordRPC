@@ -91,18 +91,18 @@ public class RPCHandler {
     }
 
     /**
-     * Sets the presence mode to single player world.
+     * Sets the presence mode to singleplayer world.
      */
     public static void setSinglePlayer() {
         singlePlayer = true;
         currentPlayers = 0;
         maxPlayers = 0;
 
-        details = "In Single Player Game";
+        details = "In Singleplayer Game";
     }
 
     /**
-     * Sets the presence mode to multi player world
+     * Sets the presence mode to multiplayer world
      * with the passed current player count and max
      * player count of the server.
      *
@@ -114,7 +114,7 @@ public class RPCHandler {
         currentPlayers = curr;
         maxPlayers = max;
 
-        details = "In Multi Player Game";
+        details = "In Multiplayer Game";
     }
 
     /**
