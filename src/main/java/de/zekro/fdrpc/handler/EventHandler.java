@@ -94,7 +94,7 @@ public class EventHandler {
      * connected to a multiplayer world, the party size is
      * added to the presence.
      */
-    private static void update() {
+    public static void update(boolean force) {
         final NetHandlerPlayClient netHandlerPlayClient = Minecraft.getMinecraft().getConnection();
         if (netHandlerPlayClient == null)
             return;
@@ -106,7 +106,7 @@ public class EventHandler {
         final int playersSize = playerInfoMap.size();
         final int slots = netHandlerPlayClient.currentServerMaxPlayers;
 
-        if (playersSize == currentServerPlayers && slots == currentServerSlots)
+        if (!force && playersSize == currentServerPlayers && slots == currentServerSlots)
             return;
 
         currentServerPlayers = playerInfoMap.size();
@@ -118,5 +118,9 @@ public class EventHandler {
             RPCHandler.setMultiPlayer(currentServerPlayers, currentServerSlots);
 
         RPCHandler.updatePresence();
+    }
+
+    public static void update() {
+        update(false);
     }
 }

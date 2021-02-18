@@ -130,6 +130,13 @@ public class RPCHandler {
         DiscordRPC.discordUpdatePresence(builder.build());
     }
 
+    /**
+     * Shuts down the Discord RPC connection.
+     */
+    public static void shutdown() {
+        DiscordRPC.discordShutdown();
+        MinecraftForge.EVENT_BUS.unregister(discordCallbackExecutor);
+    }
 
     private static Builder getDefaultPresenceBuilder(String state, String bigImageAlt) {
         return new DiscordRichPresence.Builder(state)

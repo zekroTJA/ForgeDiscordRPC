@@ -1,0 +1,5 @@
+key.toggleactive=Toggle Active
+key.category.main=ForgeDiscordRPC
+
+chat.toggle.enabled=Discord RPC connection established
+chat.toggle.disabled=Discord RPC connection shut down
