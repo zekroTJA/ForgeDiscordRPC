@@ -87,7 +87,7 @@ public class RPCHandler {
         final String displayName = ForgeDiscordRPC.getConfig().getDimensionNames()
                 .getOrDefault(dimensionName, dimensionName);
 
-        state = String.format("In %s", displayName);
+        state = displayName;
     }
 
     /**

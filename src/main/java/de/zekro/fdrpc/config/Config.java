@@ -1,12 +1,15 @@
 package de.zekro.fdrpc.config;
 
 import de.zekro.fdrpc.ForgeDiscordRPC;
+import net.minecraft.util.Tuple;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 /**
  * Handler for initializing and reading config
@@ -66,16 +69,16 @@ public class Config {
                 "dimension_names", category,
                 new String[]{
                         "overworld:Overworld",
-                        "the_nether:The Nether",
+                        "the_nether:!In The Nether",
                         "the_end:The End"
-                }, "ID of the dimension and the display name separated with a colon (':').");
+                }, "ID of the dimension and the display name separated with a colon (':').\n" +
+                        "You can prefix the value with '!' to bypass the default dimension prefix 'In ',\n"+
+                        "so that way, you can define custom display formats.\n");
 
-        Arrays.asList(dimensionNameList).forEach(e -> {
-            final String[] split = e.split(":");
-            
-            if (split.length > 1)
-                dimensionNames.put(split[0], split[1]);
-        });
+        Arrays.stream(dimensionNameList)
+                .map(Config::formatDimensionEntry)
+                .filter(Objects::nonNull)
+                .forEach(t -> dimensionNames.put(t.getFirst(), t.getSecond()));
 
         mainConfig.save();
     }
@@ -90,5 +93,17 @@ public class Config {
 
     public HashMap<String, String> getDimensionNames() {
         return dimensionNames;
+    }
+
+    private static Tuple<String, String> formatDimensionEntry(String e) {
+        final String[] split = e.split(":");
+        if (split.length < 2)
+            return null;
+
+        final String v = split[1].startsWith("!")
+                ? split[1].substring(1)
+                : "In " + split[1];
+
+        return new Tuple<>(split[0], v);
     }
 }
