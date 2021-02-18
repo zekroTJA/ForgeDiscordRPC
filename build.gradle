@@ -27,10 +27,6 @@ archivesBaseName = "${mod_name}-${version_minecraft}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
 
-compileJava {
-    sourceCompatibility = targetCompatibility = '1.8'
-}
-
 minecraft {
     // The mappings can be changed at any time, and must be in the following format.
     // snapshot_YYYYMMDD   Snapshot are built nightly.
@@ -68,28 +64,27 @@ minecraft {
 }
 
 
-//repositories {
-//
-////    maven {
-////        url 'https://jitpack.io'
-////    }
-//
-//    maven {
-//        url 'https://maven.mcmoddev.com'
-//    }
-//
-//    maven {
-//        url 'http://dvs1.progwml6.com/files/maven'
-//    }
-//
-//    maven {
-//        url 'http://maven.blamejared.com'
-//    }
-//}
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+
+    maven {
+        url 'https://maven.mcmoddev.com'
+    }
+
+    maven {
+        url 'http://dvs1.progwml6.com/files/maven'
+    }
+
+    maven {
+        url 'http://maven.blamejared.com'
+    }
+}
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2854'
-    compile fileTree(include: ['*.jar'], dir: 'src/libs')
+    compile fileTree(include: ['discord-rpc.jar'], dir: 'src/libs')
 }
 
 processResources {
@@ -134,7 +129,7 @@ jar {
 
     from {
         configurations.compile
-                .filter { f -> !f.name.contains("Dummy") }
+                .filter { it.name == 'discord-rpc.jar' }
                 .collect { it.isDirectory() ? it : zipTree(it) }
     }
 }
