@@ -23,17 +23,21 @@ jobs:
       - name: Set up Hub
         run: |
           sudo snap install hub --classic
+      - name: Inject Version
+        run: |
+          sed -i "1s/.*/$(git describe --tags --abbrev=0)/" ./CHANGELOG.md
+          sed -i -E "s/(mod_version=)debug/\1$(git describe --tags --abbrev=0)/" gradle.properties
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew jar
 
       - name: Deploy to Releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: 'hub release create
-                -a build/libs/ForgeDiscordRPC-*-$(git describe --tags --abbrev=0).jar
-                -m "$(git describe --tags --abbrev=0)"
-                $(git describe --tags --abbrev=0)'
+              -a build/libs/*.jar
+              -F ./CHANGELOG.md
+              $(git describe --tags --abbrev=0)'
