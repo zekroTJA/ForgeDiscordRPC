@@ -138,8 +138,8 @@ public class RPCHandler {
         if (!singlePlayer && currentPlayers != 0 && maxPlayers != 0)
             builder.setParty("Party", currentPlayers, maxPlayers);
 
-        if (!singlePlayer)
-            builder.setSecrets("test", "test2");
+        if (!singlePlayer && ForgeDiscordRPC.getConfig().getAllowInvites())
+            builder.setSecrets(secret, "");
 
         DiscordRPC.discordUpdatePresence(builder.build());
     }

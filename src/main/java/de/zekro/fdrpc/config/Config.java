@@ -21,6 +21,7 @@ public class Config {
 
     private String discordAppID = "";
     private String mainImageAlt = "";
+    private boolean allowInvites = true;
     private HashMap<String, String> dimensionNames = new HashMap<>();
 
     /**
@@ -61,6 +62,14 @@ public class Config {
         );
 
         // -------------------------------------------------------------------------------------------------------------
+        // --- CAT: INVITES ---
+
+        category = "invites";
+        mainConfig.addCustomCategoryComment(category, "Server Invites");
+        allowInvites = mainConfig.getBoolean("allow_invites", category, allowInvites,
+                "Wether to allow requesting server invites via Discord Rich Presence.");
+
+        // -------------------------------------------------------------------------------------------------------------
         // --- CAT: MISC ---
 
         category = "misc";
@@ -89,6 +98,10 @@ public class Config {
 
     public String getMainImageAlt() {
         return mainImageAlt;
+    }
+
+    public boolean getAllowInvites() {
+        return allowInvites;
     }
 
     public HashMap<String, String> getDimensionNames() {
