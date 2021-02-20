@@ -3,3 +3,8 @@ key.category.main=ForgeDiscordRPC
 
 chat.toggle.enabled=Discord RPC connection established
 chat.toggle.disabled=Discord RPC connection shut down
+
+gui.joinrequest.request=Discord user %s (ID %s) asks to join your server.
+gui.joinrequest.button.accept=Accept
+gui.joinrequest.button.deny=Deny
+gui.joinrequest.button.ignore=Ignore

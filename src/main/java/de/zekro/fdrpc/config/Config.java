@@ -1,6 +1,7 @@
 package de.zekro.fdrpc.config;
 
 import de.zekro.fdrpc.ForgeDiscordRPC;
+import de.zekro.fdrpc.util.Consts;
 import net.minecraft.util.Tuple;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
@@ -9,7 +10,6 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
 /**
  * Handler for initializing and reading config
@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class Config {
 
-    private File mainConfigFile;
+    private final File mainConfigFile;
 
     private String discordAppID = "";
     private String mainImageAlt = "";
@@ -51,7 +51,7 @@ public class Config {
         mainConfig.addCustomCategoryComment(category, "General Discord API app settings");
 
         discordAppID = mainConfig.getString(
-                "app_id", category, "",
+                "app_id", category, Consts.DEFAULT_CLIENT_ID,
                 "The ID of the Discord API application created at https://discordapp.com/developers/applications."
         );
 
