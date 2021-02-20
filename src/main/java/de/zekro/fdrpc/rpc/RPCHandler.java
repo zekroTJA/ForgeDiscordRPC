@@ -9,6 +9,7 @@ import net.arikia.dev.drpc.DiscordUser;
 import net.arikia.dev.drpc.callbacks.ErroredCallback;
 import net.arikia.dev.drpc.callbacks.ReadyCallback;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiMainMenu;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -17,8 +18,9 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
 import net.arikia.dev.drpc.DiscordRichPresence.Builder;
 
-import java.security.SecureRandom;
-import java.util.Base64;
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Function wrapper for {@link DiscordRPC}.
@@ -33,8 +35,6 @@ public class RPCHandler {
     private static int currentPlayers = 0;
     private static int maxPlayers = 0;
     private static boolean singlePlayer = true;
-
-    private static final String secret = generateRandomSecret(32);
 
     private static final Object discordCallbackExecutor = new Object() {
         @SubscribeEvent
@@ -138,8 +138,9 @@ public class RPCHandler {
         if (!singlePlayer && currentPlayers != 0 && maxPlayers != 0)
             builder.setParty("Party", currentPlayers, maxPlayers);
 
-        if (!singlePlayer && ForgeDiscordRPC.getConfig().getAllowInvites())
-            builder.setSecrets(secret, "");
+        ServerData currentServer = Minecraft.getMinecraft().getCurrentServerData();
+        if (!singlePlayer && ForgeDiscordRPC.getConfig().getAllowInvites() && currentServer != null)
+            builder.setSecrets(encodeServerData(currentServer), "");
 
         DiscordRPC.discordUpdatePresence(builder.build());
     }
@@ -164,17 +165,34 @@ public class RPCHandler {
         }));
     }
 
-    private static void joinGameHandler(String secret) {
-        if (RPCHandler.secret.equals(secret)) {
-            FMLClientHandler.instance().connectToServer(
-                    Minecraft.getMinecraft().currentScreen,
-                    Minecraft.getMinecraft().getCurrentServerData());
+    private static void joinGameHandler(String payload) {
+        Minecraft mc = Minecraft.getMinecraft();
+        if (mc.getCurrentServerData() != null || mc.isIntegratedServerRunning()) {
+            mc.world.sendQuittingDisconnectingPacket();
+            mc.loadWorld(null);
+            Minecraft.getMinecraft().displayGuiScreen(new GuiMainMenu());
         }
+        FMLClientHandler.instance().connectToServer(
+                Minecraft.getMinecraft().currentScreen,
+                decodeServerData(payload));
     }
 
-    private static String generateRandomSecret(int len) {
-        byte[] buff = new byte[len];
-        new SecureRandom().nextBytes(buff);
-        return Base64.getEncoder().encodeToString(buff);
+    private static String encodeServerData(ServerData data) {
+        return String.format(
+                "n=%s;ip=%s;l=%b",
+                data.serverName, data.serverIP, data.isOnLAN());
+    }
+
+    private static ServerData decodeServerData(String data) {
+        final Map<String, String> map = Arrays.stream(data.split(";"))
+                .filter(kv -> kv.length() > 0)
+                .map(kv -> kv.split("="))
+                .collect(Collectors.toMap(kv -> kv[0], kv -> kv[1]));
+
+        final String name = map.get("n");
+        final String ip = map.get("ip");
+        final boolean isLan = Boolean.parseBoolean(map.get("l"));
+
+        return new ServerData(name, ip, isLan);
     }
 }

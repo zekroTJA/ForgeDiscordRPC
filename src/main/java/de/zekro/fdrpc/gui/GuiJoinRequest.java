@@ -3,13 +3,10 @@ package de.zekro.fdrpc.gui;
 import com.google.common.collect.Lists;
 import net.arikia.dev.drpc.DiscordRPC;
 import net.arikia.dev.drpc.DiscordUser;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiButton;
-import net.minecraft.client.gui.GuiOptionButton;
 import net.minecraft.client.gui.GuiScreen;
 import net.minecraft.client.resources.I18n;
 
-import java.io.IOException;
 import java.util.List;
 
 public class GuiJoinRequest extends GuiScreen {
