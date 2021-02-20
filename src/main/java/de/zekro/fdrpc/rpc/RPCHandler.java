@@ -10,6 +10,7 @@ import net.arikia.dev.drpc.callbacks.ErroredCallback;
 import net.arikia.dev.drpc.callbacks.ReadyCallback;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiMainMenu;
+import net.minecraft.client.multiplayer.GuiConnecting;
 import net.minecraft.client.multiplayer.ServerData;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;
@@ -168,13 +169,15 @@ public class RPCHandler {
     private static void joinGameHandler(String payload) {
         Minecraft mc = Minecraft.getMinecraft();
         if (mc.getCurrentServerData() != null || mc.isIntegratedServerRunning()) {
-            mc.world.sendQuittingDisconnectingPacket();
+            if (mc.world != null)
+                mc.world.sendQuittingDisconnectingPacket();
             mc.loadWorld(null);
             Minecraft.getMinecraft().displayGuiScreen(new GuiMainMenu());
         }
-        FMLClientHandler.instance().connectToServer(
-                Minecraft.getMinecraft().currentScreen,
-                decodeServerData(payload));
+
+        mc.displayGuiScreen(new GuiConnecting(
+                mc.currentScreen != null ? mc.currentScreen : new GuiMainMenu(),
+                mc, decodeServerData(payload)));
     }
 
     private static String encodeServerData(ServerData data) {
